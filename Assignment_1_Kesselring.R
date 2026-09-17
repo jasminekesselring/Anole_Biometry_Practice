@@ -11,16 +11,7 @@ str(anoles) #Identifying data class. This data set is a dataframe, more specific
 summary(anoles$Mass) #Summary statistics for Mass.
 summary(anoles$SVL) #Summary statistics for SVL.
 summary(anoles$Sex) #Summary statistics for Sex. These are less interesting since Sex isn't a numerical class. 
-Body_Morphometrics<-anoles[c("Mass", "SVL")] #Assigned a working name to chosen variables.
-pairs(x=Body_Morphometrics,
-      pch=16,
-      cex=0.75,
-      col=rgb(red=0,
-              green=0,
-              blue=0,
-              alpha=0.5)) #FIGURE 1: Made a scatterplot that compares both variables on each axis.
-#FIGURE 1 DESCRIPTION: This figure shows the relationships between anole mass and snout-vent length on a non-logarithmic scale, with the variables displayed on both axes. As expected, there is a strong correlation between these variables. 
-plot(x=log10(anoles$Mass), 
+plot(x=log10(anoles$Mass), #FIGURE 1: Making a standard scatterplot.
      y=log10(anoles$SVL),
      xlab="Anole Mass (log10 g)", #Renaming x-axis. 
      ylab="SVL (log10 cm)", #Renaming y-axis. 
@@ -30,17 +21,25 @@ plot(x=log10(anoles$Mass),
      col=rgb(red=0,
              green=0,
              blue=0,
-             alpha=0.5)) #FIGURE 2: Made a standard scatterplot.
-#FIGURE 2 DESCRIPTION: This figure shows the logarithmic relationship between anole mass and snout-vent length. As expected, there is still a strong correlation between these variables. 
-boxplot(log10(Mass)~`Sex`, data=anoles)
-Males<-anoles[which(anoles$Sex=="M"),]
-Females<-anoles[which(anoles$Sex=="F"),]
-par(mfrow=c(1, 2))
+             alpha=0.5))
+abline(lm(log10(anoles$SVL)~log10(anoles$Mass)),#Adding a line of best fit. 
+       col="red",
+       lwd=2) 
+#FIGURE 1 DESCRIPTION: This figure shows the logarithmic relationship between anole mass and snout-vent length with an included line of best fit. As expected, there is still a strong correlation between these variables. 
+par(mfrow=c(1, 2)) #FIGURE 2: Making a double-panel histogram. 
 hist(log10(Males$`Mass`),
      xlab="Anole Mass (log10 g)", #Renaming x-axis. 
      main="Male") #Naming this figure. 
 hist(log10(Females$`Mass`),
      xlab="Anole Mass (log10 g)", #Renaming y-axis. 
      main="Female") #Naming this figure. 
-par(mfrow=c(1,1)) #FIGURE 3: Made a double-panel barplot. 
-#FIGURE 3 DESCRIPTION: This figure shows a side-by-side barplot displaying mass values for each sex on a logarithmic scale, and how many times each mass occurred for each sex. 
+par(mfrow=c(1,1)) 
+#FIGURE 2 DESCRIPTION: This figure shows a side-by-side barplot displaying mass values for each sex on a logarithmic scale, and how many times each mass occurred for each sex. 
+boxplot(log10(Mass)~`Sex`, data=anoles, #FIGURE 3: Making a side-by-side boxplot.
+        names=c("Female", "Male"), #Renaming x-axis variables.
+        col=c("pink", "steelblue" ), #Changing box colors. 
+        main="Mass Comparison by Sex",#Titling figure.
+        ylab="Mass (log10 g)") #Renaming y-axis.
+Males<-anoles[which(anoles$Sex=="M"),]
+Females<-anoles[which(anoles$Sex=="F"),] 
+#FIGURE 3 DESCRIPTION: This figure compares log10-transformed body mass split by sex. The sexual dimorphism of A. sagrei is apparent here, with males being generally larger than females. 
