@@ -69,9 +69,10 @@ curve(dgamma(x, shape = shape, rate = rate),
 
 #PART 2: DISTRIBUTIONS AND FUNCTIONS
 library(readr)
-twoa <- read_rds("https://github.com/bmaitner/biometry_course/raw/refs/heads/main/midterm/2a.RDS")
-twob <- read_rds("https://github.com/bmaitner/biometry_course/raw/refs/heads/main/midterm/2b.RDS")
-twoc <- read_rds("https://github.com/bmaitner/biometry_course/raw/refs/heads/main/midterm/2c.RDS")
+library(ggplot2)
+twoa <- read_rds("https://github.com/bmaitner/biometry_course/raw/refs/heads/main/midterm/b_2a.RDS")
+twob <- read_rds("https://github.com/bmaitner/biometry_course/raw/refs/heads/main/midterm/b_2b.RDS")
+twoc <- read_rds("https://github.com/bmaitner/biometry_course/raw/refs/heads/main/midterm/b_2c.RDS")
 
 #Inspect data set 2a.
 head(twoa)
@@ -79,29 +80,42 @@ str(twoa)
 summary(twoa)
 
 #Plot a scatterplot to choose a function. 
-plot(Wing.Length~Mass, data=twoa)
-#The shape of the data in the scatterplot implies a power law function, especially when considering that these variables could be used to describe allometric growth. 
-#These variables could reflect potential allometric growth, considering mass as a function of wing length. 
+plot(log(twoa$Adult.Body.Mass.g), log(twoa$Egg.Mass.g), 
+     xlab = "log(adult body mass, g)",
+     ylab = "log(egg mass, g)",
+     main = "Egg mass vs. adult body mass")
+#The linear shape of the data in the scatterplot implies a power law function, especially when considering that these variables could be used to describe allometric growth. 
+#These variables could reflect allometric growth due to the physiological constraints of egg mass and its interactions with body mass.
 
 #Now let's plot a histogram to choose a distribution. 
-hist(twoa$Wing.Length,
+hist(twoa$Egg.Mass.g,
+     breaks = 25,
+     col = "gray",
+     xlab = "Egg mass (g)",
+     ylab = "Frequency",
+     main = "Distribution of egg mass")
+mean(twoa$Egg.Mass.g)
+var(twoa$Egg.Mass.g)
+
+#The shape of the data in the histogram could imply a gamma distribution. Plot a curve to check. 
+hist(twoa$Egg.Mass.g,
      probability = TRUE,
      breaks = 25,
      col = "gray",
-     xlab = "Wing length",
-     ylab = "Density",
-     main = "Distribution of wing length")
+     xlab = "Egg mass (g)",
+     ylab = "Frequency",
+     main = "Distribution of egg mass")
 
-#The shape of the data in the histogram could imply a gamma distribution. Plot a curve to check. 
-m <- mean(twoa$Wing.Length)
-s2 <- var(twoa$Wing.Length)
+m  <- mean(twoa$Egg.Mass.g)
+s2 <- var(twoa$Egg.Mass.g)
 shape <- m^2 / s2
 rate  <- m / s2
+
 curve(dgamma(x, shape = shape, rate = rate),
       add = TRUE, col = "red", lwd = 2)
-#The gamma distribution curve is imperfect, but still a reasonable fit for this data. 
+#The gamma distribution curve is a reasonable fit for this data. 
 #The use of a gamma distribution can also be justified by some of the data's other properties. 
-#The data is continuous, positive, and has a noticeable right tail. Gamma curves are also a commonly used distribution for body size data, such as wing length. 
+#The data is continuous, positive, and is noticeably right skewed. Gamma curves are also a commonly used distribution for body size data, including egg mass or body mass.
 
 #Inspect data set 2b. 
 head(twob)
@@ -109,29 +123,44 @@ str(twob)
 summary(twob)
 
 #Plot a scatterplot to choose a function. 
-plot(Beak.Width ~ Beak.Length, data = twob)
-#The shape of the data in the scatterplot implies a linear function, especially when considering that these variables are both measurements of the same body part.
-#Because the variables are from the same anotomical structure, it is reasonable to assume they would scale proportionally.
+plot(twob$Total.Fish.Abundance, twob$Species.Richness,
+     xlab = "Total fish abundance",
+     ylab = "Species richness",
+     main = "Species richness vs. fish abundance")
+#The shape of the data in the scatterplot looks like it could be a Michaelis-Menten function. The shape of the curve increases initially, but then levels off. 
+#The Michaelis-Menten function is logical because species richness will eventually plateau in a finite area (such as the reef in this case). Once you've recorded most of the species, adding more individuals adds no/few new species. 
 
 #Now let's plot a histogram to choose a distribution. 
-hist(twob$Beak.Width,
+hist(twob$Species.Richness,
+     breaks = 25,
+     col = "gray",
+     xlab = "Species richness (number of species)",
+     ylab = "Frequency",
+     main = "Distribution of species richness")
+mean(twob$Species.Richness)
+var(twob$Species.Richness)
+
+#The shape of the data in the histogram could a negative binomial distribution. Plot a curve to check. 
+hist(twob$Species.Richness,
      probability = TRUE,
      breaks = 25,
      col = "gray",
-     xlab = "Beak width",
-     ylab = "Density",
-     main = "Distribution of beak width")
+     xlab = "Species Richness",
+     ylab = "Frequency",
+     main = "Distribution of species richness")
 
-#The shape of the data in the histogram could imply another gamma distribution. Plot a curve to check. 
-m  <- mean(twob$Beak.Width)
-s2 <- var(twob$Beak.Width)
-shape <- m^2 / s2
-rate  <- m / s2
-curve(dgamma(x, shape = shape, rate = rate),
-      add = TRUE, col = "red", lwd = 2)
-#This gamma distribution curve is also imperfect, but as before is still a reasonable fit for this data. 
-#Like before, the use of a gamma distribution can also be justified by some of the data's other properties. 
-#The data is continuous, positive, and has a noticeable right tail. Gamma curves are also a commonly used distribution for body size data, such as beak width. 
+m  <- mean(twob$Species.Richness)
+s2 <- var(twob$Species.Richness)
+mu<-m
+k<-m/(s2/m-1)
+x<-0:max(twob$Species.Richness)
+lines(x,
+      dnbinom(x, size=k, mu=mu),
+      type="h", col="red", lwd=2)
+#This negative binomial distribution curve is imperfect, but is still a reasonable fit for this data. 
+#A negative binomial distribution is also reasonable for this data because it is discrete and has a variance that is much larger than the mean.  
+#Biologically, a negative binomial distribution makes sense because the rate of encountering new species will differ from reef to reef.
+#If species richness/detection of new species were to remain constant from reef to reef, a Poisson distribution would be a more reasonable fit instead.
 
 #Inspect data set 2c. 
 head(twoc)
@@ -139,52 +168,67 @@ str(twoc)
 summary(twoc)
 
 #Plot a scatterplot to choose a function. 
-plot(Functional.Evenness ~ Functional.Richness, data = twoc)
-#The shape of the data in the scatterplot implies a negative linear function, especially when considering that functional richness measures the volume of trait space filled, whereas functional evenness measures how uniformly species are distributed within the trait space. 
-#When richness is high, many species will occupy a trait space, forcing occupation at the edges of the space, or overlapping. 
-#This effect therefore decreases evenness, which contributes to the inverse relationship we see on the scatterplot. 
+plot(twoc$Rugosity, twoc$Hard.Bottom.Cover.Pct,
+     xlab = "Rugosity",
+     ylab = "Hard bottom cover (%)",
+     main = "Hard bottom cover vs. rugosity")
+#The shape of the data in the scatterplot implies a logarithmic function. 
+#The shape of the data shows a steep curve at low x values, and rapidly begins to level off. 
+#Logarithmic functions can begin above zero (appropriate since rugosity never reaches zero in this data set), whereas some of the other flattening curves in the bestiary begin at zero. 
 
 #Now let's plot a histogram to choose a distribution. 
-hist(twoc$Functional.Evenness,
+hist(twoc$Hard.Bottom.Cover.Pct,
+     breaks = 20,
+     col = "gray",
+     xlab = "Hard bottom cover (%)",
+     ylab = "Frequency",
+     main = "Distribution of hard bottom cover")
+mean(twoc$Hard.Bottom.Cover.Pct)
+var(twoc$Hard.Bottom.Cover.Pct)
+
+#The shape of the data in the histogram could imply a beta distribution. Plot a curve to check. 
+#Rescale first to consider that beta is in a 0-1 proportion. 
+p<-twoc$Hard.Bottom.Cover.Pct/100
+
+hist(p,
      probability = TRUE,
      breaks = 20,
      col = "gray",
-     xlab = "Functional evenness",
-     ylab = "Density",
-     main = "Distribution of functional evenness")
+     xlab = "Hard Bottom Cover",
+     ylab = "Frequency",
+     main = "Distribution of hard bottom cover")
 
-#The shape of the data in the histogram could imply a beta distribution. Plot a curve to check. 
-m  <- mean(twoc$Functional.Evenness)
-s2 <- var(twoc$Functional.Evenness)
+m  <- mean(p)
+s2 <- var(p)
 common <- m * (1 - m) / s2 - 1
-shape1 <- m * common
-shape2 <- (1 - m) * common
-curve(dbeta(x, shape1 = shape1, shape2 = shape2),
+a <- m * common
+b <- (1 - m) * common
+curve(dbeta(x, shape1 = a, shape2 = b),
       add = TRUE, col = "red", lwd = 2)
-#This beta distribution curve is imperfect, but is still a reasonable fit for this data. 
-#Like the previous examples, there are other properties that can help us justify this distribution. 
-#The evenness data is bounded from 0 to 1, and beta distributions are useful for defining continuous data over a finite range.  
+#This beta distribution curve is a reasonable fit for this data, as long as you remember to scale the data from 0-1 to accommodate the beta distribution's 0-1 range. 
+#The rescaled data is bounded from 0 to 1, and beta distributions are useful for defining continuous data over this finite range. 
+#In this case, we treat proportions as continuous data, and because hard bottom cover is a proportion, a beta distribution is the most appropriate fit. 
 
 
 
 #PART 3: POWER ANALYSIS
 #Part 3, Figure 1: 
-sample_size <- 10
+sample_size <- 20
 a <- 2
-sd <- 8
-nsim <- 400
-bvec <- seq(-2, 2, by = 0.1)
+b<-1
 
-power.b <- numeric(length(bvec))
+nsim <- 400
+sdvec <- seq(1, 20, by = 1)
+power.sd <- numeric(length(sdvec))
 pval <- numeric(nsim)
 
-for(j in 1:length(bvec)){
+for(j in 1:length(sdvec)){
   for(i in 1:nsim){
     
     x <- sample(x = 1:20,
                 size = sample_size,
                 replace = TRUE)
-    b <- bvec[j]
+    sd <- sdvec[j]
     y_det <- a + b*x
     y <- rnorm(n = length(y_det),
                mean = y_det,
@@ -194,36 +238,36 @@ for(j in 1:length(bvec)){
     pval[i] <- coef(summary(m))["x","Pr(>|t|)"]
   }#end i lloop
   
-  power.b[j] <- sum(pval< 0.05)/nsim
+  power.sd[j] <- sum(pval< 0.05)/nsim
 }#end j loop
 
-plot(power.b ~ bvec,
+plot(power.sd ~ sdvec,
      type="l", 
      ylim=c(0, 1), 
-     xlab="Slope (b)", 
+     xlab="Standard Deviation", 
      ylab="Estimated power", 
      main=paste("Sample size=", sample_size), 
      col="black", 
      lwd=2)
-abline(h=0.8, lty=2, col="gray")
+abline(h=0.8, lty=2, col="red")
 
 #Part 3, Figure 2: 
 sample_size <- 50
 a <- 2
-sd <- 8
-nsim <- 400
-bvec <- seq(-2, 2, by = 0.1)
+b<-1
 
-power.b <- numeric(length(bvec))
+nsim <- 400
+sdvec <- seq(1, 20, by = 1)
+power.sd <- numeric(length(sdvec))
 pval <- numeric(nsim)
 
-for(j in 1:length(bvec)){
+for(j in 1:length(sdvec)){
   for(i in 1:nsim){
     
     x <- sample(x = 1:20,
                 size = sample_size,
                 replace = TRUE)
-    b <- bvec[j]
+    sd <- sdvec[j]
     y_det <- a + b*x
     y <- rnorm(n = length(y_det),
                mean = y_det,
@@ -233,36 +277,36 @@ for(j in 1:length(bvec)){
     pval[i] <- coef(summary(m))["x","Pr(>|t|)"]
   }#end i lloop
   
-  power.b[j] <- sum(pval< 0.05)/nsim
+  power.sd[j] <- sum(pval< 0.05)/nsim
 }#end j loop
 
-plot(power.b ~ bvec,
+plot(power.sd ~ sdvec,
      type="l", 
      ylim=c(0, 1), 
-     xlab="Slope (b)", 
+     xlab="Standard Deviation", 
      ylab="Estimated power", 
      main=paste("Sample size=", sample_size), 
      col="black", 
      lwd=2)
-abline(h=0.8, lty=2, col="gray")
+abline(h=0.8, lty=2, col="red")
 
 #Part 3, Figure 3: 
 sample_size <- 200
 a <- 2
-sd <- 8
-nsim <- 400
-bvec <- seq(-2, 2, by = 0.1)
+b<-1
 
-power.b <- numeric(length(bvec))
+nsim <- 400
+sdvec <- seq(1, 20, by = 1)
+power.sd <- numeric(length(sdvec))
 pval <- numeric(nsim)
 
-for(j in 1:length(bvec)){
+for(j in 1:length(sdvec)){
   for(i in 1:nsim){
     
     x <- sample(x = 1:20,
                 size = sample_size,
                 replace = TRUE)
-    b <- bvec[j]
+    sd <- sdvec[j]
     y_det <- a + b*x
     y <- rnorm(n = length(y_det),
                mean = y_det,
@@ -272,19 +316,19 @@ for(j in 1:length(bvec)){
     pval[i] <- coef(summary(m))["x","Pr(>|t|)"]
   }#end i lloop
   
-  power.b[j] <- sum(pval< 0.05)/nsim
+  power.sd[j] <- sum(pval< 0.05)/nsim
 }#end j loop
 
-plot(power.b ~ bvec,
+plot(power.sd ~ sdvec,
      type="l", 
      ylim=c(0, 1), 
-     xlab="Slope (b)", 
+     xlab="Standard Deviation", 
      ylab="Estimated power", 
      main=paste("Sample size=", sample_size), 
      col="black", 
      lwd=2)
-abline(h=0.8, lty=2, col="gray")
-#How do slope and sample size impact power? 
-#Lower slope values result in lower overall power, and therefore higher slopes also result in higher power.
-#This is because at lower slopes, there is almost no effect to detect, but as slope rises, the effect becomes easier to detect and distinguish from noise. 
-#Increasing the sample size results in a higher power at every slope, and also causes the "U" shape surrounding the slope of zero to narrow. 
+abline(h=0.8, lty=2, col="red")
+#How do noise and sample size impact power? 
+#The power for detecting our slope of 1 decreased as noise increased. 
+#At smaller sample sizes, this decline for detection was also steeper. 
+#This means that overall, power increases with decreasing noise, and power is stronger at larger sample sizes. 
