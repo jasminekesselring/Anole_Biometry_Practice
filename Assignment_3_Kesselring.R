@@ -3,11 +3,11 @@
 library(bbmle)
 library(biometrydata)
 
-# 1A: Competition between bean beetles 
+#1A: Competition between bean beetles 
 beetles <- beetle_competition_interspecific
 beetles <- beetles[beetles$pair == "Cmac_Csub" & !is.na(beetles$progeny_1), ]
 
-# Plot: offspring per female against the number of competitors
+#Plot: offspring per female against the number of competitors
 plot(beetles$start_females_1 + beetles$start_females_2,
      beetles$progeny_1 / beetles$start_females_1,
      xlab = "females in the dish, both species",
@@ -88,7 +88,7 @@ hawks <- na.omit(hawks)
 hawks$migration <- factor(hawks$Migration, levels = 1:3,
                           labels = c("resident", "partial", "migrant"))
 
-# Plot:
+#Plot:
 plot(log(hawks$Mass), log(hawks$Wing.Length), col = hawks$migration,
      xlab = "log body mass", ylab = "log wing length")
 legend("topleft", levels(hawks$migration), col = 1:3, pch = 1)
@@ -146,7 +146,7 @@ AICtab(hawk.fit, hawk_bcommon.fit, hawk_intonly.fit,
 #However, all 249 species listed here are not each their own data point.
 #Closely related species have shared traits and ancestry, but accounting for this is beyond the scope of our course. 
 
-# 1C: Reef fish species richness
+#1C: Reef fish species richness
 reef <- reef_fish_surveys
 reef$depth <- reef$DEPTH / 10
 reef$visibility <- reef$UNDERWATER_VISIBILITY / 10
@@ -175,7 +175,7 @@ reef.fit <- mle2(species_richness ~ dpois(lambda = exp(int +
 coef(reef.fit)
 AIC(reef.fit)
 
-#First we need to address is Poisson is the right distribution. 
+#First we need to address if Poisson is the right distribution. 
 var(reef$species_richness) / mean(reef$species_richness)
 
 #The data are overdispersed. This means we should probably try switching to a negative binomial distribution instead. 
@@ -249,7 +249,9 @@ AICtab(reef.fit, reef_nb.fit,
 
 #As expected, this comparison shows that the Poisson distribution was inappropriate for this data.
 #It looks like the best model is reef_nb_linear.fit. But as expected, AIC kept every term. Let's back-transform to take a better look at this: 
+
 exp(coef(reef_nb_linear.fit))
+
 #Now we can confirm that reef_nb_linear.fit was the best model choice. Removal of most of the parameters worsened the model. 
 #The Poisson model didn't work because it assumes that every species was independently recorded. In reality, species cluster within reefs. 
 #Visibility had a very strong effect, but this is likely attributed to the divers being able to see better than a reflection of the reef's overall health. 
@@ -268,7 +270,7 @@ anoles <- read_excel("Herpeton Anole Data.xlsx")
 str(anoles)
 head(anoles)
 
-#Convert the Ro_Count column to numeric
+#Convert the Ro_Count column to numeric.
 anoles$Ro_Count_num <- suppressWarnings(as.numeric(anoles$Ro_Count))
 
 #Did any values fail to convert/became NAs? If so, remove them.
@@ -276,7 +278,7 @@ sum(is.na(anoles$Ro_Count_num))
 table(anoles$Ro_Count, useNA = "ifany")
 anoles_model <- anoles[!is.na(anoles$Ro_Count_num), ]
 
-# Distribution: Check if the data is overdispersed. 
+#Distribution: Check if the data is overdispersed. 
 var(anoles$Ro_Count_num, na.rm = TRUE) / mean(anoles$Ro_Count_num, na.rm = TRUE)
 
 #The data is overdispersed, so we'll use a negative binomial distribution as a baseline. 
