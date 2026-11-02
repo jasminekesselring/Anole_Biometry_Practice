@@ -125,7 +125,7 @@ ggplot(emm_df, aes(x = Site_Class, y = prob, fill = Site_Class)) +
   coord_cartesian(ylim = c(0, 0.14)) +
   labs(x = "Site class",
        y = "Predicted *Ro* prevalence (%, ±95% CI)",
-       title = "Model-predicted *R. orientalis* prevalence") +
+       title = "GLM-predicted *R. orientalis* prevalence") +
   theme_classic(base_size = 14) +
   theme(
     legend.position = "none",
